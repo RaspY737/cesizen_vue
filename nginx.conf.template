@@ -9,14 +9,12 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
-    # Reverse proxy API (local Docker Compose uniquement)
-    # resolver 127.0.0.11 = DNS Docker, résolution lazy à la requête
-    # → nginx démarre même si l'upstream "api" n'existe pas (Clever Cloud)
+    # Reverse proxy API — URL injectée via envsubst au démarrage
+    # Local Docker Compose : API_URL=http://api:8080
+    # Clever Cloud        : API_URL=https://<api-app>.cleverapps.io
     location /api/ {
-        resolver 127.0.0.11 valid=30s ipv6=off;
-        set $upstream http://api:8080;
-        proxy_pass $upstream;
-        proxy_set_header Host $host;
+        proxy_pass ${API_URL}/;
+        proxy_set_header Host $proxy_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
