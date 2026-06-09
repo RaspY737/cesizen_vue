@@ -24,7 +24,10 @@ server {
     # Local Docker Compose : API_URL=http://api:8080
     # Clever Cloud        : API_URL=https://<api-app>.cleverapps.io
     location /api/ {
-        proxy_pass ${API_URL}/;
+        # Pas de slash final : on préserve le préfixe /api/ attendu par l'API
+        proxy_pass ${API_URL};
+        # Envoi du SNI vers l'upstream HTTPS (Clever Cloud route par SNI)
+        proxy_ssl_server_name on;
         proxy_set_header Host $proxy_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
